@@ -28,9 +28,9 @@ const LandingPage = () => {
             
             <div className="hero-graphic">
               <div className="wheat-stalks">
-
+                <Wheat size={80} className="wheat-stalk wheat-1" />
                 <Wheat size={100} className="wheat-stalk wheat-2" />
-
+                <Wheat size={70} className="wheat-stalk wheat-3" />
               </div>
             </div>
           </div>
