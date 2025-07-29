@@ -1267,25 +1267,33 @@ body {
   position: relative;
   display: flex;
   align-items: flex-end;
-  gap: 1rem;
+  gap: 0.5rem;
 }
 
 .wheat-stalk {
-  color: #fbbf24;
   opacity: 0.9;
-  animation: sway 3s ease-in-out infinite;
+  animation: sway 6s ease-in-out infinite;
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+  transform-origin: bottom center;
 }
 
 .wheat-1 {
   animation-delay: 0s;
+  height: 250px;
+  rotate: -7deg;
 }
 
 .wheat-2 {
   animation-delay: 0.5s;
+  height: 300px; /* Middle stalk is largest */
 }
 
 .wheat-3 {
   animation-delay: 1s;
+  height: 255px;
+  rotate: 7deg;
 }
 
 @keyframes sway {
