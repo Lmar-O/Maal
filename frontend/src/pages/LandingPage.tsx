@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { TrendingUp, Shield, BookOpen, ArrowRight, Wheat } from 'lucide-react'
+import { TrendingUp, Shield, BookOpen, ArrowRight } from 'lucide-react'
 
 const LandingPage = () => {
   return (
@@ -28,9 +28,9 @@ const LandingPage = () => {
             
             <div className="hero-graphic">
               <div className="wheat-stalks">
-                <Wheat size={80} className="wheat-stalk wheat-1" />
-                <Wheat size={100} className="wheat-stalk wheat-2" />
-                <Wheat size={70} className="wheat-stalk wheat-3" />
+                <img src="/images/wheat.png" alt="Wheat stalk" className="wheat-stalk wheat-1" />
+                <img src="/images/wheat.png" alt="Wheat stalk" className="wheat-stalk wheat-2" />
+                <img src="/images/wheat.png" alt="Wheat stalk" className="wheat-stalk wheat-3" />
               </div>
             </div>
           </div>
