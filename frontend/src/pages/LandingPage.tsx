@@ -28,9 +28,7 @@ const LandingPage = () => {
             
             <div className="hero-graphic">
               <div className="wheat-stalks">
-                <img src="/images/wheat.png" alt="Wheat stalk" className="wheat-stalk wheat-1" />
-                <img src="/images/wheat.png" alt="Wheat stalk" className="wheat-stalk wheat-2" />
-                <img src="/images/wheat.png" alt="Wheat stalk" className="wheat-stalk wheat-3" />
+                <img src="/images/wheat.png" alt="Wheat stalks" className="wheat-image" />
               </div>
             </div>
           </div>
