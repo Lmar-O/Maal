@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { TrendingUp, Shield, BookOpen, Calculator, ArrowRight, Wheat } from 'lucide-react'
+import { TrendingUp, Shield, BookOpen, ArrowRight, Wheat } from 'lucide-react'
 
 const LandingPage = () => {
   return (
