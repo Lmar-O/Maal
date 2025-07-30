@@ -71,13 +71,13 @@ const InvestmentCalculator = () => {
     const labels: string[] = []
     const totalInvested: number[] = []
     const totalValue: number[] = []
-    const halalGrowth: number[] = []
+    const totalGrowth: number[] = []
     
     for (let month = 0; month <= totalMonths; month += 12) {
       const year = month / 12
       labels.push(`Year ${year}`)
       
-      // Calculate conventional growth with proper compound interest
+      // Calculate investment total with proper compound interest
       let conventionalValue = data.initialAmount
       let conventionalContributed = data.initialAmount
       
@@ -99,10 +99,10 @@ const InvestmentCalculator = () => {
       
       totalInvested.push(conventionalContributed)
       totalValue.push(conventionalValue)
-      halalGrowth.push(halalValue)
+      totalGrowth.push(halalValue - halalContributed) // Investment total - total contributions
     }
     
-    return { labels, totalInvested, totalValue, halalGrowth }
+    return { labels, totalInvested, totalValue, totalGrowth }
   }
 
   useEffect(() => {
@@ -112,7 +112,7 @@ const InvestmentCalculator = () => {
       labels: data.labels,
       datasets: [
         {
-          label: 'Total Invested',
+          label: 'Contributions',
           data: data.totalInvested,
           borderColor: 'rgb(156, 163, 175)',
           backgroundColor: 'rgba(156, 163, 175, 0.1)',
@@ -120,16 +120,17 @@ const InvestmentCalculator = () => {
           tension: 0.4
         },
         {
-          label: 'Conventional Growth',
-          data: data.totalValue,
+          label: 'Total Growth',
+          data: data.totalGrowth,
           borderColor: 'rgb(59, 130, 246)',
           backgroundColor: 'rgba(59, 130, 246, 0.1)',
           fill: false,
           tension: 0.4
         },
         {
-          label: 'Halal Growth',
-          data: data.halalGrowth,
+          label: 'Investment Total',
+          data: data.totalValue,
+
           borderColor: 'rgb(34, 197, 94)',
           backgroundColor: 'rgba(34, 197, 94, 0.1)',
           fill: false,
@@ -190,8 +191,8 @@ const InvestmentCalculator = () => {
 
   const finalValues = chartData ? {
     totalInvested: chartData.datasets[0].data[chartData.datasets[0].data.length - 1],
-    conventionalGrowth: chartData.datasets[1].data[chartData.datasets[1].data.length - 1],
-    halalGrowth: chartData.datasets[2].data[chartData.datasets[2].data.length - 1]
+    totalGrowth: chartData.datasets[1].data[chartData.datasets[1].data.length - 1],
+    conventionalGrowth: chartData.datasets[2].data[chartData.datasets[2].data.length - 1]
   } : null
 
   return (
@@ -309,16 +310,16 @@ const InvestmentCalculator = () => {
                   <h2>Investment Summary</h2>
                   <div className="results-grid">
                     <div className="result-card">
-                      <h3>Total Invested</h3>
+                      <h3>Contributions</h3>
                       <p className="result-value">${finalValues.totalInvested.toLocaleString()}</p>
                     </div>
                     <div className="result-card">
-                      <h3>Conventional Growth</h3>
-                      <p className="result-value">${finalValues.conventionalGrowth.toLocaleString()}</p>
+                      <h3>Total Growth</h3>
+                      <p className="result-value">${finalValues.totalGrowth.toLocaleString()}</p>
                     </div>
                     <div className="result-card highlight">
-                      <h3>Halal Growth</h3>
-                      <p className="result-value">${finalValues.halalGrowth.toLocaleString()}</p>
+                      <h3>Investment Total</h3>
+                      <p className="result-value">${finalValues.conventionalGrowth.toLocaleString()}</p>
                     </div>
                   </div>
                 </div>
@@ -373,7 +374,7 @@ const InvestmentCalculator = () => {
               </div>
               
               <div className="info-card">
-                <h3>Conventional vs Halal Returns</h3>
+                <h3>Investment Total vs Halal Returns</h3>
                 <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
                 <ul>
                   <li>Halal returns typically 15% lower than conventional</li>
