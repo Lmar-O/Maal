@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { useEffect } from 'react'
 import './App.css'
 import LandingPage from './pages/LandingPage'
-import BlogPage from './pages/BlogPage'
+import LearnPage from './pages/LearnPage'
 import InvestmentCalculator from './pages/InvestmentCalculator'
 import Navbar from './components/Navbar'
 
@@ -25,7 +25,7 @@ function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<LandingPage />} />
-          <Route path="/blog" element={<BlogPage />} />
+          <Route path="/learn" element={<LearnPage />} />
           <Route path="/calculator" element={<InvestmentCalculator />} />
         </Routes>
       </div>

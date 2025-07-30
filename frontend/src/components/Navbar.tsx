@@ -70,12 +70,12 @@ const Navbar = () => {
             </Link>
             
             <Link 
-              to="/blog" 
-              className={`nav-link ${isActive('/blog') ? 'active' : ''}`}
+              to="/learn" 
+              className={`nav-link ${isActive('/learn') ? 'active' : ''}`}
               onClick={closeMenu}
             >
               <BookOpen size={20} />
-              <span>Blog</span>
+              <span>Learn</span>
             </Link>
             
             <Link 
@@ -106,12 +106,12 @@ const Navbar = () => {
           </Link>
           
           <Link 
-            to="/blog" 
-            className={`mobile-nav-link ${isActive('/blog') ? 'active' : ''}`}
+            to="/learn" 
+            className={`mobile-nav-link ${isActive('/learn') ? 'active' : ''}`}
             onClick={closeMenu}
           >
             <BookOpen size={20} />
-            <span>Blog</span>
+            <span>Learn</span>
           </Link>
           
           <Link 

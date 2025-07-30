@@ -11,7 +11,7 @@ interface BlogPost {
   image: string
 }
 
-const BlogPage = () => {
+const LearnPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('all')
 
   const blogPosts: BlogPost[] = [
@@ -82,7 +82,7 @@ const BlogPage = () => {
       <div className="container">
         {/* Header */}
         <div className="blog-header">
-          <h1 className="blog-title">Islamic Finance Blog</h1>
+                      <h1 className="blog-title">Learn Islamic Finance</h1>
           <p className="blog-subtitle">
             Learn about halal personal finance, investment strategies, and Islamic financial principles
           </p>
@@ -169,4 +169,4 @@ const BlogPage = () => {
   )
 }
 
-export default BlogPage
+export default LearnPage

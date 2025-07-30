@@ -16,7 +16,7 @@ const LandingPage = () => {
                 Learn. Plan. Grow - the Halal Way
               </p>
               <div className="hero-buttons">
-                <Link to="/blog" className="btn-primary">
+                <Link to="/learn" className="btn-primary">
                   Start Learning
                   <ArrowRight size={20} />
                 </Link>
