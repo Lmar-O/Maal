@@ -55,7 +55,7 @@ const Navbar = () => {
       <div className="container">
         <div className="nav-content">
           <Link to="/" className="nav-logo" onClick={closeMenu}>
-            <span className="logo-text">maal</span>
+            <span className="logo-text" style={{ fontWeight: 600, letterSpacing: '0.01em', fontFamily: "'Poppins', 'Inter', sans-serif" }}>maal</span>
           </Link>
           
           {/* Desktop Navigation */}

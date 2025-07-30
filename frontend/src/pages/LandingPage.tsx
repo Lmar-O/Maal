@@ -59,12 +59,46 @@ const LandingPage = () => {
         </div>
       </div>
 
+      <section className="additional-content">
+        <div className="container">
+          <div className="content-section">
+            <h2>Our Mission</h2>
+            <p>Personal finance is an overwhelming topic for many people, especially for Muslims. We want to make it simple and easy to understand so that you can focus on your goals, without the stress of getting lost in the details.</p>
+            <p>If you don't know how to start investing, what a 401k is, or how you can clean your wealth, we will provide tools and resources to help you get started.</p>
+          </div>
+        </div>
+    </section>
+
       {/* Bottom Section */}
       <section className="bottom-section">
         <div className="container">
           <div className="content-card">
-            <h2>Why Choose Halal Finance?</h2>
+            <h2>
+              What is{' '}
+              <img
+                src="/images/maal-logo.png"
+                alt="maal"
+                style={{
+                  height: '0.8em',
+                  verticalAlign: 'baseline',
+                  marginLeft: '0.1em',
+                  marginRight: '0.2em',
+                  display: 'inline',
+                  position: 'relative',
+                  bottom: '-0.02em'
+                }}
+              />
+              ?
+            </h2>
             <div className="features-grid">
+              <div className="feature-card">
+                <div className="feature-icon">
+                  <BookOpen />
+                </div>
+                <h3>Educational Resources</h3>
+                <p>If you are new to personal finance, we will guide you to free resources to learn and grow step-by-step.</p>
+              </div>
+              
               <div className="feature-card">
                 <div className="feature-icon">
                   <Shield />
@@ -78,16 +112,10 @@ const LandingPage = () => {
                   <TrendingUp />
                 </div>
                 <h3>Grow Your Wealth</h3>
-                <p>Discover halal investment opportunities that can help you build sustainable wealth over time.</p>
+                <p>Discover halal investment opportunities that can help you build clean, sustainable wealth over time.</p>
               </div>
               
-              <div className="feature-card">
-                <div className="feature-icon">
-                  <BookOpen />
-                </div>
-                <h3>Educational Resources</h3>
-                <p>Access comprehensive guides and articles on Islamic personal finance and investment strategies.</p>
-              </div>
+
             </div>
           </div>
         </div>
@@ -98,8 +126,7 @@ const LandingPage = () => {
         <div className="container">
           <div className="content-section">
             <h2>Our Mission</h2>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
-            <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+            <p>Personal finance is an overwhelming topic for many people, especially for Muslims. We want to make it simple and easy to understand so that you can focus on your goals, without the stress of getting lost in the details.</p>
           </div>
 
           <div className="content-section">
