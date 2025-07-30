@@ -37,6 +37,28 @@ const LandingPage = () => {
         </div>
       </section>
 
+      {/* Under Construction Tape */}
+      <div className="construction-tape">
+        <div className="tape-stripe">
+          <span className="tape-text">UNDER CONSTRUCTION</span>
+          <span className="tape-text">UNDER CONSTRUCTION</span>
+          <span className="tape-text">UNDER CONSTRUCTION</span>
+          <span className="tape-text">UNDER CONSTRUCTION</span>
+          <span className="tape-text">UNDER CONSTRUCTION</span>
+          <span className="tape-text">UNDER CONSTRUCTION</span>
+          <span className="tape-text">UNDER CONSTRUCTION</span>
+          <span className="tape-text">UNDER CONSTRUCTION</span>
+          <span className="tape-text">UNDER CONSTRUCTION</span>
+          <span className="tape-text">UNDER CONSTRUCTION</span>
+          <span className="tape-text">UNDER CONSTRUCTION</span>
+          <span className="tape-text">UNDER CONSTRUCTION</span>
+          <span className="tape-text">UNDER CONSTRUCTION</span>
+          <span className="tape-text">UNDER CONSTRUCTION</span>
+          <span className="tape-text">UNDER CONSTRUCTION</span>
+          <span className="tape-text">UNDER CONSTRUCTION</span>
+        </div>
+      </div>
+
       {/* Bottom Section */}
       <section className="bottom-section">
         <div className="container">

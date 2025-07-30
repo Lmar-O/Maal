@@ -27,7 +27,8 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   line-height: 1.6;
   color: var(--gray-900);
-  background-color: var(--white);
+  background: linear-gradient(0deg, #a6d2ba 0%, #ffffff 100%);
+  background-attachment: fixed;
   overscroll-behavior: none;
 }
 
@@ -302,6 +303,8 @@ body {
 
 /* Blog Page Styles */
 .blog-page {
+  background: linear-gradient(0deg, #a6d2ba 0%, #ffffff 100%);
+  min-height: 100vh;
   padding: 60px 0;
 }
 
@@ -1163,7 +1166,55 @@ body {
 
 /* Updated Landing Page Styles - Matching Design */
 .landing-page {
+  background: linear-gradient(0deg, #a6d2ba 0%, #ffffff 100%);
   min-height: 100vh;
+}
+
+/* Under Construction Tape */
+.construction-tape {
+  position: relative;
+  width: 100%;
+  height: 60px;
+  overflow: hidden;
+  transform: rotate(-2deg);
+  margin: -10px 0;
+  z-index: 10;
+}
+
+.tape-stripe {
+  position: absolute;
+  width: 200%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    45deg,
+    #ffcc00 0px,
+    #ffcc00 30px,
+    #000000 30px,
+    #000000 60px
+  );
+  display: flex;
+  align-items: center;
+  animation: slideLeft 50s linear infinite;
+}
+
+.tape-text {
+  font-family: 'Arial Black', Arial, sans-serif;
+  font-weight: 900;
+  font-size: 16px;
+  color: #ffffff;
+  text-shadow: 1px 1px 0px #000000;
+  white-space: nowrap;
+  padding: 0 60px;
+  letter-spacing: 2px;
+}
+
+@keyframes slideLeft {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 .hero-section {
@@ -1525,10 +1576,7 @@ body {
   color: #3fa784;
 }
 
-.navbar.non-landing .nav-link:hover {
-  color: #3fa784;
-  background: rgba(107, 193, 151, 0.1);
-}
+/* Removed - moved to higher specificity section below */
 
 .navbar.non-landing .nav-link.active {
   color: #3fa784;
@@ -1653,6 +1701,16 @@ body {
 .nav-link:hover {
   color: white;
   background: rgba(255, 255, 255, 0.2);
+}
+
+/* Override for non-landing pages - maximum specificity */
+.navbar.non-landing .nav-content .nav-links .nav-link:hover {
+  color: #3fa784 !important;
+  background: rgba(61, 206, 136, 0.15) !important;
+  background-color: rgba(107, 193, 151, 0.15) !important;
+  background-image: none !important;
+  background-gradient: none !important;
+
 }
 
 .nav-link.active {
