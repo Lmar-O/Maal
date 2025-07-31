@@ -456,7 +456,7 @@ const InvestmentCalculator = () => {
     <div className="calculator-page">
       <div className="container">
         <div className="calculator-header">
-          <h1 className="calculator-title">Halal Investment Calculator</h1>
+          <h1 className="calculator-title">Investment Calculator</h1>
           <p className="calculator-subtitle">
             Plan your halal investment strategy and see how your money can grow while staying true to Islamic principles
           </p>

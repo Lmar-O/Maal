@@ -520,6 +520,7 @@ body {
   grid-template-columns: 1fr 2fr;
   gap: 3rem;
   margin-bottom: 3rem;
+  align-items: stretch;
 }
 
 .calculator-output {
@@ -537,11 +538,26 @@ body {
     0 4px 16px rgba(0, 0, 0, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  height: fit-content;
   backdrop-filter: blur(20px);
   position: relative;
   z-index: 1;
 }
+
+/* Match height of output section in simple calculator mode */
+.calculator-inputs:has(.simple-calculator) {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.simple-calculator {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+
 
 .calculator-inputs h2 {
   font-size: 1.25rem;
