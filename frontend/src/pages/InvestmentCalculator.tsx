@@ -35,6 +35,13 @@ interface InvestmentCheckpoint {
   contributionFrequency: ContributionFrequency
 }
 
+interface Withdrawal {
+  id: string
+  year: number
+  amount: number
+  validationMessage?: string
+}
+
 interface SimpleInvestmentData {
   initialAmount: number
   contributionAmount: number
@@ -48,6 +55,7 @@ interface VariableInvestmentData {
   annualReturn: number
   years: number
   checkpoints: InvestmentCheckpoint[]
+  withdrawals: Withdrawal[]
 }
 
 const InvestmentCalculator = () => {
@@ -72,7 +80,8 @@ const InvestmentCalculator = () => {
         contributionAmount: 500,
         contributionFrequency: 'monthly'
       }
-    ]
+    ],
+    withdrawals: [] as Withdrawal[]
   })
 
   const [chartData, setChartData] = useState<any>(null)
@@ -186,6 +195,17 @@ const InvestmentCalculator = () => {
           halalValue = halalValue * (1 + halalMonthlyReturn) + contributionPerMonth
           halalContributed += contributionPerMonth
         }
+        
+        // Apply withdrawals at the end of each complete year
+        if ((m + 1) % 12 === 0) { // End of a year
+          const completedYear = Math.floor((m + 1) / 12)
+          const yearWithdrawals = data.withdrawals.filter(w => w.year === completedYear)
+          for (const withdrawal of yearWithdrawals) {
+            conventionalValue = Math.max(0, conventionalValue - withdrawal.amount)
+            halalValue = Math.max(0, halalValue - withdrawal.amount)
+            // Note: withdrawals don't affect the total contributed amount
+          }
+        }
       }
       
       totalInvested.push(conventionalContributed)
@@ -195,6 +215,19 @@ const InvestmentCalculator = () => {
     
     return { labels, totalInvested, totalValue, totalGrowth }
   }
+
+  // Clear validation messages when parameters change that might affect withdrawal validity
+  useEffect(() => {
+    if (variableData.withdrawals.some(w => w.validationMessage)) {
+      setVariableData(prev => ({
+        ...prev,
+        withdrawals: prev.withdrawals.map(w => ({
+          ...w,
+          validationMessage: undefined
+        }))
+      }))
+    }
+  }, [variableData.years, variableData.annualReturn, variableData.initialAmount, JSON.stringify(variableData.checkpoints)])
 
   useEffect(() => {
     const data = calculatorMode === 'simple' 
@@ -443,6 +476,147 @@ const InvestmentCalculator = () => {
     setVariableData(prev => ({
       ...prev,
       checkpoints: prev.checkpoints.filter(cp => cp.id !== checkpointId)
+    }))
+  }
+
+  // Helper function to calculate investment value at a specific year
+  const calculateInvestmentValueAtYear = (data: VariableInvestmentData, targetYear: number) => {
+    const sortedCheckpoints = [...data.checkpoints].sort((a, b) => a.startYear - b.startYear)
+    let conventionalValue = data.initialAmount
+    let halalValue = data.initialAmount
+    let halalContributed = data.initialAmount
+    
+    const totalMonths = targetYear * 12
+    
+    for (let m = 0; m < totalMonths; m++) {
+      const currentYear = m / 12
+      
+      // Find which checkpoint applies to this month
+      let activeCheckpoint = null
+      for (let i = sortedCheckpoints.length - 1; i >= 0; i--) {
+        if (currentYear >= sortedCheckpoints[i].startYear) {
+          activeCheckpoint = sortedCheckpoints[i]
+          break
+        }
+      }
+      
+      if (activeCheckpoint) {
+        const monthlyReturn = data.annualReturn / 100 / 12
+        const contributionPerMonth = getContributionPerMonth(
+          activeCheckpoint.contributionAmount, 
+          activeCheckpoint.contributionFrequency
+        )
+        
+        conventionalValue = conventionalValue * (1 + monthlyReturn) + contributionPerMonth
+        
+        const halalReturn = data.annualReturn * 0.85
+        const halalMonthlyReturn = halalReturn / 100 / 12
+        halalValue = halalValue * (1 + halalMonthlyReturn) + contributionPerMonth
+        halalContributed += contributionPerMonth
+      }
+      
+      // Apply previous withdrawals at the end of each complete year
+      if ((m + 1) % 12 === 0) {
+        const completedYear = Math.floor((m + 1) / 12)
+        const yearWithdrawals = data.withdrawals.filter(w => w.year === completedYear && w.year < targetYear)
+        for (const withdrawal of yearWithdrawals) {
+          conventionalValue = Math.max(0, conventionalValue - withdrawal.amount)
+          halalValue = Math.max(0, halalValue - withdrawal.amount)
+        }
+      }
+    }
+    
+    return { conventionalValue, halalValue }
+  }
+
+  // Withdrawal management functions
+  const handleWithdrawalChange = (withdrawalId: string, field: keyof Withdrawal, value: string | number) => {
+    let processedValue: any = value
+    
+    if (typeof value === 'string' && (field === 'amount' || field === 'year')) {
+      processedValue = parseNumber(value)
+    }
+    
+    // Validate withdrawal amount doesn't exceed available investment
+    if (field === 'amount' && processedValue > 0) {
+      const withdrawal = variableData.withdrawals.find(w => w.id === withdrawalId)
+      if (withdrawal) {
+        const { halalValue } = calculateInvestmentValueAtYear(variableData, withdrawal.year)
+        if (processedValue > halalValue) {
+          // Cap the withdrawal amount to the available investment value
+          processedValue = Math.floor(halalValue)
+        }
+      }
+    }
+    
+    // Validate withdrawal amount when year changes
+    if (field === 'year' && processedValue >= 0) {
+      const withdrawal = variableData.withdrawals.find(w => w.id === withdrawalId)
+      if (withdrawal && withdrawal.amount > 0) {
+        const { halalValue } = calculateInvestmentValueAtYear(variableData, processedValue)
+        if (withdrawal.amount > halalValue) {
+          // Update the withdrawal amount to the max available at the new year
+          setVariableData(prev => ({
+            ...prev,
+            withdrawals: prev.withdrawals.map(w => 
+              w.id === withdrawalId 
+                ? { 
+                    ...w, 
+                    year: processedValue, 
+                    amount: Math.floor(halalValue),
+                    validationMessage: `Amount adjusted to maximum available: $${Math.floor(halalValue).toLocaleString()}`
+                  }
+                : w
+            )
+          }))
+          return // Early return since we've already updated the state
+        }
+      }
+    }
+    
+    setVariableData(prev => ({
+      ...prev,
+      withdrawals: prev.withdrawals.map(w => {
+        if (w.id === withdrawalId) {
+          const updatedWithdrawal = { ...w, [field]: processedValue }
+          
+          // Clear any existing validation message and check for new validation
+          updatedWithdrawal.validationMessage = undefined
+          
+          // If updating amount, check if it exceeds available investment
+          if (field === 'amount' && processedValue > 0) {
+            const { halalValue } = calculateInvestmentValueAtYear(variableData, w.year)
+            if (processedValue > halalValue) {
+              updatedWithdrawal.amount = Math.floor(halalValue)
+              updatedWithdrawal.validationMessage = `Amount capped to maximum available: $${Math.floor(halalValue).toLocaleString()}`
+            }
+          }
+          
+          return updatedWithdrawal
+        }
+        return w
+      })
+    }))
+  }
+
+  const addWithdrawal = () => {
+    const newWithdrawal: Withdrawal = {
+      id: Date.now().toString(),
+      year: Math.floor(variableData.years / 2), // Default to middle of investment period
+      amount: 10000,
+      validationMessage: undefined
+    }
+    
+    setVariableData(prev => ({
+      ...prev,
+      withdrawals: [...prev.withdrawals, newWithdrawal]
+    }))
+  }
+
+  const removeWithdrawal = (withdrawalId: string) => {
+    setVariableData(prev => ({
+      ...prev,
+      withdrawals: prev.withdrawals.filter(w => w.id !== withdrawalId)
     }))
   }
 
@@ -732,6 +906,87 @@ const InvestmentCalculator = () => {
                         </div>
                       ))}
                     </div>
+                  </div>
+
+                  {/* Withdrawals Section */}
+                  <div className="withdrawals-section">
+                    <div className="withdrawals-header">
+                      <h3>Withdrawals</h3>
+                      <button
+                        type="button"
+                        className="add-withdrawal-btn"
+                        onClick={addWithdrawal}
+                      >
+                        <Plus size={16} />
+                        Add Withdrawal
+                      </button>
+                    </div>
+
+                    {variableData.withdrawals.length > 0 && (
+                      <div className="withdrawals-list">
+                        {variableData.withdrawals
+                          .sort((a, b) => a.year - b.year)
+                          .map((withdrawal, index) => (
+                          <div key={withdrawal.id} className="withdrawal-card">
+                            <div className="withdrawal-header">
+                              <h4>Withdrawal {index + 1}: Year {withdrawal.year}</h4>
+                              <button
+                                type="button"
+                                className="remove-withdrawal-btn"
+                                onClick={() => removeWithdrawal(withdrawal.id)}
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+
+                            <div className="withdrawal-inputs">
+                              <div className="input-group">
+                                <label>
+                                  <Calendar size={16} />
+                                  Year
+                                </label>
+                                <input
+                                  type="text"
+                                  value={withdrawal.year}
+                                  onChange={(e) => handleWithdrawalChange(withdrawal.id, 'year', e.target.value)}
+                                  onBlur={(e) => {
+                                    const num = parseNumber(e.target.value)
+                                    e.target.value = num.toString()
+                                  }}
+                                  placeholder="0"
+                                />
+                              </div>
+
+                              <div className="input-group">
+                                <label>
+                                  <DollarSign size={16} />
+                                  Amount
+                                </label>
+                                <input
+                                  type="text"
+                                  value={formatNumber(withdrawal.amount)}
+                                  onChange={(e) => handleWithdrawalChange(withdrawal.id, 'amount', e.target.value)}
+                                  onBlur={(e) => {
+                                    const formatted = formatNumber(parseNumber(e.target.value))
+                                    e.target.value = formatted
+                                  }}
+                                  placeholder="0"
+                                />
+                                {withdrawal.validationMessage ? (
+                                  <div className="withdrawal-validation-text">
+                                    {withdrawal.validationMessage}
+                                  </div>
+                                ) : (
+                                  <div className="withdrawal-helper-text">
+                                    Max available: ${Math.floor(calculateInvestmentValueAtYear(variableData, withdrawal.year).halalValue).toLocaleString()}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
