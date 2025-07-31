@@ -58,8 +58,8 @@ const Navbar = () => {
             <span className="logo-text" style={{ fontWeight: 600, letterSpacing: '0.01em', fontFamily: "'Poppins', 'Inter', sans-serif" }}>maal</span>
           </Link>
           
-          {/* Desktop Navigation */}
-          <div className="nav-links desktop-nav">
+          {/* Desktop Navigation - Centered */}
+          <div className="nav-links desktop-nav centered-nav">
             <Link 
               to="/" 
               className={`nav-link ${isActive('/') ? 'active' : ''}`}
@@ -87,6 +87,9 @@ const Navbar = () => {
               <span>Calculator</span>
             </Link>
           </div>
+
+          {/* Spacer for balanced layout */}
+          <div className="nav-spacer desktop-only"></div>
 
           {/* Mobile Menu Button */}
           <button className="mobile-menu-btn" onClick={toggleMenu}>

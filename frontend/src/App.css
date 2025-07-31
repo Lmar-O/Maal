@@ -121,14 +121,28 @@ body {
 }
 
 .nav-content {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   padding: 16px 0;
 }
 
 .nav-logo {
+  justify-self: start;
   text-decoration: none;
+}
+
+.centered-nav {
+  justify-self: center;
+}
+
+.nav-spacer {
+  justify-self: end;
+  width: 48px; /* Same width as mobile menu button */
+}
+
+.desktop-only {
+  display: block;
 }
 
 .logo-text {
@@ -167,11 +181,20 @@ body {
 }
 
 @media (max-width: 768px) {
+  .nav-content {
+    display: flex;
+    justify-content: space-between;
+  }
+  
   .nav-links {
     gap: 16px;
   }
   
   .nav-link span {
+    display: none;
+  }
+  
+  .desktop-only {
     display: none;
   }
 }
@@ -1451,8 +1474,8 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Adjust navbar height to accommodate larger logo */
 .nav-content {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   padding: 20px 0;
   min-height: 80px;
@@ -1472,8 +1495,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .nav-content {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   padding: 1rem 0;
   position: relative;
@@ -2121,8 +2144,8 @@ body {
 }
 
 .nav-content {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   padding: 0.5rem 0;
   position: relative;
