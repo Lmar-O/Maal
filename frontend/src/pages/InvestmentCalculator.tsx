@@ -11,7 +11,7 @@ import {
   Legend,
   Filler
 } from 'chart.js'
-import { TrendingUp, DollarSign, Percent, Calendar } from 'lucide-react'
+import { TrendingUp, DollarSign, Percent, Calendar, Plus, Trash2, ToggleLeft, ToggleRight, Settings } from 'lucide-react'
 
 // Register Chart.js components
 ChartJS.register(
@@ -26,8 +26,16 @@ ChartJS.register(
 )
 
 type ContributionFrequency = 'weekly' | 'biweekly' | 'monthly' | 'annually'
+type CalculatorMode = 'simple' | 'variable'
 
-interface InvestmentData {
+interface InvestmentCheckpoint {
+  id: string
+  startYear: number
+  contributionAmount: number
+  contributionFrequency: ContributionFrequency
+}
+
+interface SimpleInvestmentData {
   initialAmount: number
   contributionAmount: number
   contributionFrequency: ContributionFrequency
@@ -35,38 +43,60 @@ interface InvestmentData {
   years: number
 }
 
+interface VariableInvestmentData {
+  initialAmount: number
+  annualReturn: number
+  years: number
+  checkpoints: InvestmentCheckpoint[]
+}
+
 const InvestmentCalculator = () => {
-  const [investmentData, setInvestmentData] = useState<InvestmentData>({
+  const [calculatorMode, setCalculatorMode] = useState<CalculatorMode>('simple')
+  
+  const [simpleData, setSimpleData] = useState<SimpleInvestmentData>({
     initialAmount: 10000,
     contributionAmount: 500,
     contributionFrequency: 'monthly',
     annualReturn: 4,
     years: 20
   })
+  
+  const [variableData, setVariableData] = useState<VariableInvestmentData>({
+    initialAmount: 10000,
+    annualReturn: 4,
+    years: 20,
+    checkpoints: [
+      {
+        id: '1',
+        startYear: 0,
+        contributionAmount: 500,
+        contributionFrequency: 'monthly'
+      }
+    ]
+  })
 
   const [chartData, setChartData] = useState<any>(null)
 
-  const calculateInvestment = (data: InvestmentData) => {
+  // Helper function to get monthly contribution amount
+  const getContributionPerMonth = (amount: number, frequency: ContributionFrequency) => {
+    switch (frequency) {
+      case 'weekly':
+        return amount * 4.33 // Average weeks per month
+      case 'biweekly':
+        return amount * 2.17 // Average biweekly periods per month
+      case 'monthly':
+        return amount
+      case 'annually':
+        return amount / 12
+      default:
+        return amount
+    }
+  }
+
+  const calculateSimpleInvestment = (data: SimpleInvestmentData) => {
     const monthlyReturn = data.annualReturn / 100 / 12
     const totalMonths = data.years * 12
-    
-    // Calculate contribution frequency multipliers
-    const getContributionPerMonth = () => {
-      switch (data.contributionFrequency) {
-        case 'weekly':
-          return data.contributionAmount * 4.33 // Average weeks per month
-        case 'biweekly':
-          return data.contributionAmount * 2.17 // Average biweekly periods per month
-        case 'monthly':
-          return data.contributionAmount
-        case 'annually':
-          return data.contributionAmount / 12
-        default:
-          return data.contributionAmount
-      }
-    }
-    
-    const contributionPerMonth = getContributionPerMonth()
+    const contributionPerMonth = getContributionPerMonth(data.contributionAmount, data.contributionFrequency)
     
     const labels: string[] = []
     const totalInvested: number[] = []
@@ -77,7 +107,7 @@ const InvestmentCalculator = () => {
       const year = month / 12
       labels.push(`Year ${year}`)
       
-      // Calculate investment total with proper compound interest
+      // Calculate conventional growth with proper compound interest
       let conventionalValue = data.initialAmount
       let conventionalContributed = data.initialAmount
       
@@ -105,8 +135,71 @@ const InvestmentCalculator = () => {
     return { labels, totalInvested, totalValue, totalGrowth }
   }
 
+  const calculateVariableInvestment = (data: VariableInvestmentData) => {
+    const totalMonths = data.years * 12
+    
+    const labels: string[] = []
+    const totalInvested: number[] = []
+    const totalValue: number[] = []
+    const totalGrowth: number[] = []
+    
+    // Sort checkpoints by start year to ensure proper order
+    const sortedCheckpoints = [...data.checkpoints].sort((a, b) => a.startYear - b.startYear)
+    
+    for (let month = 0; month <= totalMonths; month += 12) {
+      const year = month / 12
+      labels.push(`Year ${year}`)
+      
+      let conventionalValue = data.initialAmount
+      let conventionalContributed = data.initialAmount
+      let halalValue = data.initialAmount
+      let halalContributed = data.initialAmount
+      
+      // Calculate month by month, applying different checkpoint parameters
+      for (let m = 0; m < month; m++) {
+        const currentYear = m / 12
+        
+        // Find which checkpoint applies to this month
+        // Use the latest checkpoint that has started by this point
+        let activeCheckpoint = null
+        for (let i = sortedCheckpoints.length - 1; i >= 0; i--) {
+          if (currentYear >= sortedCheckpoints[i].startYear) {
+            activeCheckpoint = sortedCheckpoints[i]
+            break
+          }
+        }
+        
+        if (activeCheckpoint) {
+          const monthlyReturn = data.annualReturn / 100 / 12
+          const contributionPerMonth = getContributionPerMonth(
+            activeCheckpoint.contributionAmount, 
+            activeCheckpoint.contributionFrequency
+          )
+          
+          // Apply growth and add contribution
+          conventionalValue = conventionalValue * (1 + monthlyReturn) + contributionPerMonth
+          conventionalContributed += contributionPerMonth
+          
+          // Halal calculation (slightly lower returns)
+          const halalReturn = data.annualReturn * 0.85
+          const halalMonthlyReturn = halalReturn / 100 / 12
+          halalValue = halalValue * (1 + halalMonthlyReturn) + contributionPerMonth
+          halalContributed += contributionPerMonth
+        }
+      }
+      
+      totalInvested.push(conventionalContributed)
+      totalValue.push(conventionalValue)
+      totalGrowth.push(halalValue - halalContributed) // Investment total - total contributions
+    }
+    
+    return { labels, totalInvested, totalValue, totalGrowth }
+  }
+
   useEffect(() => {
-    const data = calculateInvestment(investmentData)
+    const data = calculatorMode === 'simple' 
+      ? calculateSimpleInvestment(simpleData)
+      : calculateVariableInvestment(variableData)
     
     setChartData({
       labels: data.labels,
@@ -114,51 +207,155 @@ const InvestmentCalculator = () => {
         {
           label: 'Contributions',
           data: data.totalInvested,
-          borderColor: 'rgb(156, 163, 175)',
-          backgroundColor: 'rgba(156, 163, 175, 0.1)',
+          borderColor: '#a0aec0',
+          backgroundColor: 'rgba(160, 174, 192, 0.1)',
+          pointBackgroundColor: '#a0aec0',
+          pointBorderColor: '#ffffff',
+          pointHoverBackgroundColor: '#718096',
+          pointHoverBorderColor: '#ffffff',
           fill: false,
           tension: 0.4
         },
         {
           label: 'Total Growth',
           data: data.totalGrowth,
-          borderColor: 'rgb(59, 130, 246)',
-          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+          borderColor: '#4299e1',
+          backgroundColor: 'rgba(66, 153, 225, 0.1)',
+          pointBackgroundColor: '#4299e1',
+          pointBorderColor: '#ffffff',
+          pointHoverBackgroundColor: '#3182ce',
+          pointHoverBorderColor: '#ffffff',
           fill: false,
           tension: 0.4
         },
         {
           label: 'Investment Total',
           data: data.totalValue,
-
-          borderColor: 'rgb(34, 197, 94)',
-          backgroundColor: 'rgba(34, 197, 94, 0.1)',
+          borderColor: '#48bb78',
+          backgroundColor: 'rgba(72, 187, 120, 0.1)',
+          pointBackgroundColor: '#48bb78',
+          pointBorderColor: '#ffffff',
+          pointHoverBackgroundColor: '#38a169',
+          pointHoverBorderColor: '#ffffff',
           fill: false,
           tension: 0.4
         }
       ]
     })
-  }, [investmentData])
+  }, [calculatorMode, simpleData, variableData])
 
   const chartOptions = {
     responsive: true,
+    maintainAspectRatio: false,
+    interaction: {
+      intersect: false,
+      mode: 'index' as const,
+    },
     plugins: {
       legend: {
         position: 'top' as const,
+        labels: {
+          padding: 20,
+          usePointStyle: true,
+          pointStyle: 'circle',
+          font: {
+            family: 'Poppins',
+            size: 14,
+            weight: 500
+          },
+          color: '#4a5568'
+        }
       },
       title: {
         display: true,
         text: 'Investment Growth Comparison'
+      },
+      tooltip: {
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        titleColor: '#1a202c',
+        bodyColor: '#4a5568',
+        borderColor: '#e2e8f0',
+        borderWidth: 1,
+        cornerRadius: 8,
+        displayColors: true,
+        padding: 12,
+        titleFont: {
+          family: 'Poppins',
+          size: 14,
+          weight: 600
+        },
+        bodyFont: {
+          family: 'Roboto',
+          size: 13
+        },
+        callbacks: {
+          label: function(context: any) {
+            const num = context.parsed.y
+            let formattedValue
+            if (num >= 1000000) {
+              formattedValue = '$' + (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M'
+            } else if (num >= 1000) {
+              formattedValue = '$' + (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k'
+            } else {
+              formattedValue = '$' + num.toLocaleString()
+            }
+            return context.dataset.label + ': ' + formattedValue
+          }
+        }
       }
     },
     scales: {
-      y: {
-        beginAtZero: true,
+      x: {
+        grid: {
+          color: 'rgba(226, 232, 240, 0.5)',
+          lineWidth: 1
+        },
+        border: {
+          color: '#e2e8f0'
+        },
         ticks: {
-          callback: function(value: any) {
-            return '$' + value.toLocaleString()
+          color: '#718096',
+          font: {
+            family: 'Roboto',
+            size: 12
           }
         }
+      },
+      y: {
+        beginAtZero: true,
+        grid: {
+          color: 'rgba(226, 232, 240, 0.5)',
+          lineWidth: 1
+        },
+        border: {
+          color: '#e2e8f0'
+        },
+        ticks: {
+          color: '#718096',
+          font: {
+            family: 'Roboto',
+            size: 12
+          },
+          callback: function(value: any) {
+            const num = Number(value)
+            if (num >= 1000000) {
+              return '$' + (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M'
+            } else if (num >= 1000) {
+              return '$' + (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k'
+            }
+            return '$' + num.toLocaleString()
+          }
+        }
+      }
+    },
+    elements: {
+      point: {
+        radius: 4,
+        hoverRadius: 6,
+        borderWidth: 2
+      },
+      line: {
+        borderWidth: 3
       }
     }
   }
@@ -174,7 +371,20 @@ const InvestmentCalculator = () => {
     return isNaN(num) ? 0 : num
   }
 
-  const handleInputChange = (field: keyof InvestmentData, value: string | number) => {
+  const handleSimpleInputChange = (field: keyof SimpleInvestmentData, value: string | number) => {
+    let processedValue: any = value
+    
+    if (typeof value === 'string' && field !== 'contributionFrequency') {
+      processedValue = parseNumber(value)
+    }
+    
+    setSimpleData(prev => ({
+      ...prev,
+      [field]: processedValue
+    }))
+  }
+
+  const handleVariableInputChange = (field: keyof VariableInvestmentData, value: string | number) => {
     let numericValue: number
     
     if (typeof value === 'string') {
@@ -183,9 +393,56 @@ const InvestmentCalculator = () => {
       numericValue = value
     }
     
-    setInvestmentData(prev => ({
+    setVariableData(prev => ({
       ...prev,
       [field]: numericValue
+    }))
+  }
+
+  const handleCheckpointChange = (checkpointId: string, field: keyof InvestmentCheckpoint, value: string | number) => {
+    let processedValue: any = value
+    
+    if (typeof value === 'string' && (field === 'contributionAmount' || field === 'startYear')) {
+      processedValue = parseNumber(value)
+    }
+    
+    setVariableData(prev => ({
+      ...prev,
+      checkpoints: prev.checkpoints.map(cp => 
+        cp.id === checkpointId 
+          ? { ...cp, [field]: processedValue }
+          : cp
+      )
+    }))
+  }
+
+  const addCheckpoint = () => {
+    // Sort checkpoints to find the latest one
+    const sortedCheckpoints = [...variableData.checkpoints].sort((a, b) => a.startYear - b.startYear)
+    const latestCheckpoint = sortedCheckpoints[sortedCheckpoints.length - 1]
+    
+    // Calculate midpoint between latest checkpoint start and investment period end
+    const midPoint = Math.floor((latestCheckpoint.startYear + variableData.years) / 2)
+    
+    const newCheckpoint: InvestmentCheckpoint = {
+      id: Date.now().toString(),
+      startYear: midPoint,
+      contributionAmount: latestCheckpoint.contributionAmount,
+      contributionFrequency: latestCheckpoint.contributionFrequency
+    }
+    
+    setVariableData(prev => ({
+      ...prev,
+      checkpoints: [...prev.checkpoints, newCheckpoint]
+    }))
+  }
+
+  const removeCheckpoint = (checkpointId: string) => {
+    if (variableData.checkpoints.length <= 1) return // Don't allow removing the last checkpoint
+    
+    setVariableData(prev => ({
+      ...prev,
+      checkpoints: prev.checkpoints.filter(cp => cp.id !== checkpointId)
     }))
   }
 
@@ -203,6 +460,34 @@ const InvestmentCalculator = () => {
           <p className="calculator-subtitle">
             Plan your halal investment strategy and see how your money can grow while staying true to Islamic principles
           </p>
+          
+          {/* Calculator Mode Toggle */}
+          <div className="calculator-mode-toggle">
+            <div className="toggle-container">
+              <button
+                type="button"
+                className={`toggle-option ${calculatorMode === 'simple' ? 'active' : ''}`}
+                onClick={() => setCalculatorMode('simple')}
+              >
+                <Settings size={18} />
+                Simple Calculator
+              </button>
+              <button
+                type="button"
+                className={`toggle-option ${calculatorMode === 'variable' ? 'active' : ''}`}
+                onClick={() => setCalculatorMode('variable')}
+              >
+                {calculatorMode === 'variable' ? <ToggleRight size={18} /> : <ToggleLeft size={18} />}
+                Variable Calculator
+              </button>
+            </div>
+            <p className="toggle-description">
+              {calculatorMode === 'simple' 
+                ? 'Use consistent parameters throughout the investment period' 
+                : 'Adjust contributions for different time periods'
+              }
+            </p>
+          </div>
         </div>
 
         <div className="calculator-content">
@@ -211,95 +496,245 @@ const InvestmentCalculator = () => {
             <div className="calculator-inputs">
               <h2>Investment Parameters</h2>
               
-              <div className="input-group">
-                <label>
-                  <DollarSign size={20} />
-                  Initial Investment
-                </label>
-                <input
-                  type="text"
-                  value={formatNumber(investmentData.initialAmount)}
-                  onChange={(e) => handleInputChange('initialAmount', e.target.value)}
-                  onBlur={(e) => {
-                    const formatted = formatNumber(parseNumber(e.target.value))
-                    e.target.value = formatted
-                  }}
-                  placeholder="0"
-                />
-              </div>
+              {calculatorMode === 'simple' ? (
+                /* Simple Calculator Mode */
+                <div className="simple-calculator">
+                  <div className="input-group">
+                    <label>
+                      <DollarSign size={20} />
+                      Initial Investment
+                    </label>
+                    <input
+                      type="text"
+                      value={formatNumber(simpleData.initialAmount)}
+                      onChange={(e) => handleSimpleInputChange('initialAmount', e.target.value)}
+                      onBlur={(e) => {
+                        const formatted = formatNumber(parseNumber(e.target.value))
+                        e.target.value = formatted
+                      }}
+                      placeholder="0"
+                    />
+                  </div>
 
-              <div className="input-group">
-                <label>
-                  <Calendar size={20} />
-                  Contribution Frequency
-                </label>
-                <div className="frequency-toggle">
-                  {(['weekly', 'biweekly', 'monthly', 'annually'] as const).map((frequency) => (
-                    <button
-                      key={frequency}
-                      type="button"
-                      className={`frequency-btn ${investmentData.contributionFrequency === frequency ? 'active' : ''}`}
-                      onClick={() => setInvestmentData(prev => ({
-                        ...prev,
-                        contributionFrequency: frequency
-                      }))}
-                    >
-                      {frequency.charAt(0).toUpperCase() + frequency.slice(1)}
-                    </button>
-                  ))}
+                  <div className="input-group">
+                    <label>
+                      <Calendar size={20} />
+                      Contribution Frequency
+                    </label>
+                    <div className="frequency-toggle">
+                      {(['weekly', 'biweekly', 'monthly', 'annually'] as const).map((frequency) => (
+                        <button
+                          key={frequency}
+                          type="button"
+                          className={`frequency-btn ${simpleData.contributionFrequency === frequency ? 'active' : ''}`}
+                          onClick={() => handleSimpleInputChange('contributionFrequency', frequency)}
+                        >
+                          {frequency.charAt(0).toUpperCase() + frequency.slice(1)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="input-group">
+                    <label>
+                      <TrendingUp size={20} />
+                      Contribution Amount
+                    </label>
+                    <input
+                      type="text"
+                      value={formatNumber(simpleData.contributionAmount)}
+                      onChange={(e) => handleSimpleInputChange('contributionAmount', e.target.value)}
+                      onBlur={(e) => {
+                        const formatted = formatNumber(parseNumber(e.target.value))
+                        e.target.value = formatted
+                      }}
+                      placeholder="0"
+                    />
+                  </div>
+
+                  <div className="input-group">
+                    <label>
+                      <Percent size={20} />
+                      Annual Return Rate (%)
+                    </label>
+                    <input
+                      type="text"
+                      value={simpleData.annualReturn}
+                      onChange={(e) => handleSimpleInputChange('annualReturn', e.target.value)}
+                      onBlur={(e) => {
+                        const num = parseNumber(e.target.value)
+                        e.target.value = num.toString()
+                      }}
+                      placeholder="0"
+                    />
+                  </div>
+
+                  <div className="input-group">
+                    <label>
+                      <Calendar size={20} />
+                      Investment Period (Years)
+                    </label>
+                    <input
+                      type="text"
+                      value={simpleData.years}
+                      onChange={(e) => handleSimpleInputChange('years', e.target.value)}
+                      onBlur={(e) => {
+                        const num = parseNumber(e.target.value)
+                        e.target.value = num.toString()
+                      }}
+                      placeholder="0"
+                    />
+                  </div>
                 </div>
-              </div>
-              
-              <div className="input-group">
-                <label>
-                  <TrendingUp size={20} />
-                  Contribution Amount
-                </label>
-                <input
-                  type="text"
-                  value={formatNumber(investmentData.contributionAmount)}
-                  onChange={(e) => handleInputChange('contributionAmount', e.target.value)}
-                  onBlur={(e) => {
-                    const formatted = formatNumber(parseNumber(e.target.value))
-                    e.target.value = formatted
-                  }}
-                  placeholder="0"
-                />
-              </div>
+              ) : (
+                /* Variable Calculator Mode */
+                <div className="variable-calculator">
+                  {/* Basic Settings */}
+                  <div className="basic-settings">
+                    <div className="input-group">
+                      <label>
+                        <DollarSign size={20} />
+                        Initial Investment
+                      </label>
+                      <input
+                        type="text"
+                        value={formatNumber(variableData.initialAmount)}
+                        onChange={(e) => handleVariableInputChange('initialAmount', e.target.value)}
+                        onBlur={(e) => {
+                          const formatted = formatNumber(parseNumber(e.target.value))
+                          e.target.value = formatted
+                        }}
+                        placeholder="0"
+                      />
+                    </div>
 
-              <div className="input-group">
-                <label>
-                  <Percent size={20} />
-                  Annual Return Rate (%)
-                </label>
-                <input
-                  type="text"
-                  value={investmentData.annualReturn}
-                  onChange={(e) => handleInputChange('annualReturn', e.target.value)}
-                  onBlur={(e) => {
-                    const num = parseNumber(e.target.value)
-                    e.target.value = num.toString()
-                  }}
-                  placeholder="0"
-                />
-              </div>
+                    <div className="input-group">
+                      <label>
+                        <Percent size={20} />
+                        Annual Return Rate (%)
+                      </label>
+                      <input
+                        type="text"
+                        value={variableData.annualReturn}
+                        onChange={(e) => handleVariableInputChange('annualReturn', e.target.value)}
+                        onBlur={(e) => {
+                          const num = parseNumber(e.target.value)
+                          e.target.value = num.toString()
+                        }}
+                        placeholder="0"
+                      />
+                    </div>
 
-              <div className="input-group">
-                <label>
-                  <Calendar size={20} />
-                  Investment Period (Years)
-                </label>
-                <input
-                  type="text"
-                  value={investmentData.years}
-                  onChange={(e) => handleInputChange('years', e.target.value)}
-                  onBlur={(e) => {
-                    const num = parseNumber(e.target.value)
-                    e.target.value = num.toString()
-                  }}
-                  placeholder="0"
-                />
-              </div>
+                    <div className="input-group">
+                      <label>
+                        <Calendar size={20} />
+                        Investment Period (Years)
+                      </label>
+                      <input
+                        type="text"
+                        value={variableData.years}
+                        onChange={(e) => handleVariableInputChange('years', e.target.value)}
+                        onBlur={(e) => {
+                          const num = parseNumber(e.target.value)
+                          e.target.value = num.toString()
+                        }}
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Checkpoints Section */}
+                  <div className="checkpoints-section">
+                    <div className="checkpoints-header">
+                      <h3>Investment Checkpoints</h3>
+                      <button
+                        type="button"
+                        className="add-checkpoint-btn"
+                        onClick={addCheckpoint}
+                      >
+                        <Plus size={16} />
+                        Add Checkpoint
+                      </button>
+                    </div>
+
+                    <div className="checkpoints-list">
+                      {variableData.checkpoints
+                        .sort((a, b) => a.startYear - b.startYear)
+                        .map((checkpoint, index) => (
+                        <div key={checkpoint.id} className="checkpoint-card">
+                          <div className="checkpoint-header">
+                            <h4>Checkpoint {index + 1}: Starting Year {checkpoint.startYear}</h4>
+                            {variableData.checkpoints.length > 1 && (
+                              <button
+                                type="button"
+                                className="remove-checkpoint-btn"
+                                onClick={() => removeCheckpoint(checkpoint.id)}
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            )}
+                          </div>
+
+                          <div className="checkpoint-inputs">
+                            <div className="input-group">
+                              <label>
+                                <Calendar size={16} />
+                                Start Year
+                              </label>
+                              <input
+                                type="text"
+                                value={checkpoint.startYear}
+                                onChange={(e) => handleCheckpointChange(checkpoint.id, 'startYear', e.target.value)}
+                                onBlur={(e) => {
+                                  const num = parseNumber(e.target.value)
+                                  e.target.value = num.toString()
+                                }}
+                                placeholder="0"
+                              />
+                            </div>
+
+                            <div className="input-group">
+                              <label>
+                                <TrendingUp size={16} />
+                                Contribution Amount
+                              </label>
+                              <input
+                                type="text"
+                                value={formatNumber(checkpoint.contributionAmount)}
+                                onChange={(e) => handleCheckpointChange(checkpoint.id, 'contributionAmount', e.target.value)}
+                                onBlur={(e) => {
+                                  const formatted = formatNumber(parseNumber(e.target.value))
+                                  e.target.value = formatted
+                                }}
+                                placeholder="0"
+                              />
+                            </div>
+
+                            <div className="input-group">
+                              <label>
+                                <Calendar size={16} />
+                                Frequency
+                              </label>
+                              <div className="frequency-toggle">
+                                {(['weekly', 'biweekly', 'monthly', 'annually'] as const).map((frequency) => (
+                                  <button
+                                    key={frequency}
+                                    type="button"
+                                    className={`frequency-btn ${checkpoint.contributionFrequency === frequency ? 'active' : ''}`}
+                                    onClick={() => handleCheckpointChange(checkpoint.id, 'contributionFrequency', frequency)}
+                                  >
+                                    {frequency.charAt(0).toUpperCase() + frequency.slice(1)}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Right Side - Results and Chart */}
