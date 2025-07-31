@@ -621,9 +621,18 @@ const InvestmentCalculator = () => {
   }
 
   const finalValues = chartData ? {
-    totalInvested: chartData.datasets[0].data[chartData.datasets[0].data.length - 1],
-    totalGrowth: chartData.datasets[1].data[chartData.datasets[1].data.length - 1],
-    conventionalGrowth: chartData.datasets[2].data[chartData.datasets[2].data.length - 1]
+    totalInvested: (() => {
+      const val = Number(chartData.datasets[0].data[chartData.datasets[0].data.length - 1]);
+      return Number.isInteger(val) ? val : Number(val.toFixed(2));
+    })(),
+    totalGrowth: (() => {
+      const val = Number(chartData.datasets[1].data[chartData.datasets[1].data.length - 1]);
+      return Number.isInteger(val) ? val : Number(val.toFixed(2));
+    })(),
+    conventionalGrowth: (() => {
+      const val = Number(chartData.datasets[2].data[chartData.datasets[2].data.length - 1]);
+      return Number.isInteger(val) ? val : Number(val.toFixed(2));
+    })()
   } : null
 
   return (

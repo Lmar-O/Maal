@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Calendar, Clock, ArrowRight } from 'lucide-react'
+import { Calendar, Clock, ArrowRight, Construction, AlertTriangle } from 'lucide-react'
 
 interface BlogPost {
   id: number
@@ -14,6 +14,7 @@ interface BlogPost {
 const LearnPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('all')
 
+  
   const blogPosts: BlogPost[] = [
     {
       id: 1,
@@ -80,6 +81,36 @@ const LearnPage = () => {
   return (
     <div className="blog-page">
       <div className="container">
+        {/* Construction Banner */}
+        <div className="construction-banner">
+          <div className="construction-tape">
+            <div className="tape-stripe"></div>
+            <div className="tape-stripe"></div>
+            <div className="tape-stripe"></div>
+            <div className="tape-stripe"></div>
+            <div className="tape-stripe"></div>
+          </div>
+          <div className="construction-content">
+            <div className="construction-icon">
+              <Construction size={24} />
+            </div>
+            <div className="construction-text">
+              <h3>Under Construction</h3>
+              <p>This page is currently being developed. The content below is placeholder text for design purposes.</p>
+            </div>
+            <div className="construction-icon">
+              <AlertTriangle size={24} />
+            </div>
+          </div>
+          <div className="construction-tape">
+            <div className="tape-stripe"></div>
+            <div className="tape-stripe"></div>
+            <div className="tape-stripe"></div>
+            <div className="tape-stripe"></div>
+            <div className="tape-stripe"></div>
+          </div>
+        </div>
+
         {/* Header */}
         <div className="blog-header">
                       <h1 className="blog-title">Learn Islamic Finance</h1>

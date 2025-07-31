@@ -199,6 +199,80 @@ body {
   }
 }
 
+/* Construction Banner Styles */
+.construction-banner {
+  margin: 2rem 0;
+  position: relative;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+}
+
+.construction-tape {
+  height: 8px;
+  background: repeating-linear-gradient(
+    90deg,
+    #fbbf24,
+    #fbbf24 30px,
+    #dc2626 30px,
+    #dc2626 60px
+  );
+  position: relative;
+}
+
+.construction-content {
+  padding: 1.5rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+}
+
+.construction-icon {
+  color: #dc2626;
+}
+
+.construction-text {
+  flex: 1;
+  text-align: center;
+}
+
+.construction-text h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #dc2626;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+.construction-text p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+  .construction-content {
+    padding: 1rem;
+    gap: 1rem;
+  }
+  
+  .construction-text h3 {
+    font-size: 1.1rem;
+  }
+  
+  .construction-text p {
+    font-size: 0.9rem;
+  }
+  
+  .construction-icon {
+    display: none;
+  }
+}
+
 /* Landing Page Styles */
 .hero {
   padding: 0px 0;
