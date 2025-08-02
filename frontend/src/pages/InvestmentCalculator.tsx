@@ -138,7 +138,7 @@ const InvestmentCalculator = () => {
       
       totalInvested.push(conventionalContributed)
       totalValue.push(conventionalValue)
-      totalGrowth.push(halalValue - halalContributed) // Investment total - total contributions
+      totalGrowth.push(conventionalValue - conventionalContributed) // Investment total - total contributions
     }
     
     return { labels, totalInvested, totalValue, totalGrowth }
@@ -210,7 +210,7 @@ const InvestmentCalculator = () => {
       
       totalInvested.push(conventionalContributed)
       totalValue.push(conventionalValue)
-      totalGrowth.push(halalValue - halalContributed) // Investment total - total contributions
+      totalGrowth.push(conventionalValue - conventionalContributed) // Investment total - total contributions
     }
     
     return { labels, totalInvested, totalValue, totalGrowth }
