@@ -1,1 +1,1 @@
-self.__REACT_LOADABLE_MANIFEST="{}"
+self.__REACT_LOADABLE_MANIFEST="{\"pages/calculator.tsx -> chart.js\":{\"id\":\"pages/calculator.tsx -> chart.js\",\"files\":[\"static/chunks/_pages-dir-browser_node_modules_chart_js_dist_chart_js.js\"]},\"pages/calculator.tsx -> react-chartjs-2\":{\"id\":\"pages/calculator.tsx -> react-chartjs-2\",\"files\":[\"static/chunks/_pages-dir-browser_node_modules_react-chartjs-2_dist_index_js.js\"]}}"
