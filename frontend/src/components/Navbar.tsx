@@ -1,16 +1,17 @@
-import { Link, useLocation } from 'react-router-dom'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { BookOpen, Calculator, Home, Menu, X } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 const Navbar = () => {
-  const location = useLocation()
+  const router = useRouter()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
 
-  const isActive = (path: string) => location.pathname === path
-  const isLandingPage = location.pathname === '/'
+  const isActive = (path: string) => router.pathname === path
+  const isLandingPage = router.pathname === '/'
 
   useEffect(() => {
     const handleScroll = () => {
@@ -54,14 +55,14 @@ const Navbar = () => {
     <nav className={`navbar ${isScrolled ? 'scrolled' : ''} ${!isLandingPage ? 'non-landing' : ''} ${isVisible ? 'visible' : 'hidden'}`}>
       <div className="container">
         <div className="nav-content">
-          <Link to="/" className="nav-logo" onClick={closeMenu}>
+          <Link href="/" className="nav-logo" onClick={closeMenu}>
             <span className="logo-text" style={{ fontWeight: 600, letterSpacing: '0.01em', fontFamily: "'Poppins', 'Inter', sans-serif" }}>maal</span>
           </Link>
           
           {/* Desktop Navigation - Centered */}
           <div className="nav-links desktop-nav centered-nav">
             <Link 
-              to="/" 
+              href="/" 
               className={`nav-link ${isActive('/') ? 'active' : ''}`}
               onClick={closeMenu}
             >
@@ -70,7 +71,7 @@ const Navbar = () => {
             </Link>
             
             <Link 
-              to="/learn" 
+              href="/learn" 
               className={`nav-link ${isActive('/learn') ? 'active' : ''}`}
               onClick={closeMenu}
             >
@@ -79,7 +80,7 @@ const Navbar = () => {
             </Link>
             
             <Link 
-              to="/calculator" 
+              href="/calculator" 
               className={`nav-link ${isActive('/calculator') ? 'active' : ''}`}
               onClick={closeMenu}
             >
@@ -100,7 +101,7 @@ const Navbar = () => {
         {/* Mobile Navigation */}
         <div className={`mobile-nav ${isMenuOpen ? 'open' : ''}`}>
           <Link 
-            to="/" 
+            href="/" 
             className={`mobile-nav-link ${isActive('/') ? 'active' : ''}`}
             onClick={closeMenu}
           >
@@ -109,7 +110,7 @@ const Navbar = () => {
           </Link>
           
           <Link 
-            to="/learn" 
+            href="/learn" 
             className={`mobile-nav-link ${isActive('/learn') ? 'active' : ''}`}
             onClick={closeMenu}
           >
@@ -118,7 +119,7 @@ const Navbar = () => {
           </Link>
           
           <Link 
-            to="/calculator" 
+            href="/calculator" 
             className={`mobile-nav-link ${isActive('/calculator') ? 'active' : ''}`}
             onClick={closeMenu}
           >
