@@ -80,7 +80,3 @@ Instead, it promotes:
 - Ethical business models
 - Real estate investments
 - Islamic banking products
-
-## Contributing
-
-This is an educational project focused on Islamic finance principles. Contributions that align with halal financial practices are welcome.
