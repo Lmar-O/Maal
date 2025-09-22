@@ -1,0 +1,1 @@
+self.__REACT_LOADABLE_MANIFEST='{"pages/calculator.tsx -> chart.js":{"id":1047,"files":["static/chunks/6d2b60a9.03853196c845ea3e.js","static/chunks/601.eb99a24406d5f723.js"]},"pages/calculator.tsx -> react-chartjs-2":{"id":1134,"files":["static/chunks/6d2b60a9.03853196c845ea3e.js","static/chunks/601.eb99a24406d5f723.js","static/chunks/134.e179990f8f265b9d.js"]}}';
